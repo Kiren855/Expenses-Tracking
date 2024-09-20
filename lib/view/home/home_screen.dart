@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:trackizer/model/transaction.dart';
+import 'package:trackizer/model/user.dart';
+import 'package:trackizer/service/transation.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -7,163 +14,191 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   DateTime selectedDate = DateTime.now();
 
-  // Hàm để mở hộp thoại chọn tháng và năm
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Color.fromARGB(255, 254, 221, 85), // Màu của header
-              onPrimary: Colors.black, // Màu của text trên header
-              onSurface: Colors.black, // Màu của text bên trong
-            ),
-            textButtonTheme: TextButtonThemeData(
-            
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
+    final DateTime? picked = await showMonthPicker(
+        context: context,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+        initialDate: selectedDate);
 
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
       });
+    }
+  }
+
+  String formatCurrency(int amount) {
+    final NumberFormat currencyFormat = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+      decimalDigits: 0,
+    );
+    return currencyFormat.format(amount);
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<AppUser?>(context);
+    final uid = user?.uid;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sổ Thu Chi', style: TextStyle(color: Colors.black)),
-        backgroundColor: Color.fromARGB(255, 254, 221, 85),
-        leading: IconButton(
-          icon: Icon(Icons.search, color: Colors.black),
-          onPressed: () {},
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
+        title: const Text('Hôm', style: TextStyle(color: Colors.black)),
+        backgroundColor: const Color.fromARGB(255, 254, 221, 85),
       ),
       body: Column(
         children: [
-          // Thêm tháng và năm bên cạnh phần chi phí
-          Container(
-            color: Color.fromARGB(255, 254, 221, 85),
-            padding: EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Thêm cột tháng và năm với khả năng click để chọn tháng
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        _selectDate(context); // Chọn tháng và năm
-                      },
-                      child: Column(
+          StreamBuilder<Map<String, dynamic>>(
+            stream: TransactionService().getMonthlySummary(uid!, selectedDate),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+
+              if (snapshot.hasData) {
+                final totalExpenses = snapshot.data!['totalExpenses'] ?? 0;
+                final totalIncome = snapshot.data!['totalIncome'] ?? 0;
+                final balance = snapshot.data!['balance'] ?? 0;
+
+                return Container(
+                  color: const Color.fromARGB(255, 254, 221, 85),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
                         children: [
-                          Text("Tháng",
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 18)),
-                          Text("${selectedDate.month}/${selectedDate.year}",
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 24)),
+                          GestureDetector(
+                            onTap: () {
+                              _selectDate(context);
+                            },
+                            child: Column(
+                              children: [
+                                const Text("Tháng",
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 18)),
+                                Text(
+                                    "${selectedDate.month}/${selectedDate.year}",
+                                    style: const TextStyle(
+                                        color: Colors.black, fontSize: 24)),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text("Chi phí", style: TextStyle(color: Colors.black)),
-                    Text("2.640.000", style: TextStyle(color: Colors.black)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text("Thu nhập", style: TextStyle(color: Colors.black)),
-                    Text("5.000.000", style: TextStyle(color: Colors.black)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text("Số dư", style: TextStyle(color: Colors.black)),
-                    Text("2.360.000", style: TextStyle(color: Colors.black)),
-                  ],
-                ),
-              ],
-            ),
+                      Column(
+                        children: [
+                          const Text("Chi phí",
+                              style: TextStyle(color: Colors.black)),
+                          Text("$totalExpenses",
+                              style: const TextStyle(color: Colors.black)),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          const Text("Thu nhập",
+                              style: TextStyle(color: Colors.black)),
+                          Text("$totalIncome",
+                              style: const TextStyle(color: Colors.black)),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          const Text("Số dư",
+                              style: TextStyle(color: Colors.black)),
+                          Text("$balance",
+                              style: const TextStyle(color: Colors.black)),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return const Text("Không có dữ liệu");
+            },
           ),
           Expanded(
-            child: ListView(
-              children: [
-                listItem('Tiền nhà', '-1.000.000', Icons.home),
-                listItem('Lương', '5.000.000', Icons.monetization_on),
-                listItem('Mua khoá học', '-1.500.000', Icons.book),
-                listItem('Gói mạng', '-90.000', Icons.wifi),
-                listItem('Mua đồ ăn', '-50.000', Icons.fastfood),
-              ],
+            child: StreamBuilder<List<Transactions>>(
+              stream: TransactionService().getTransactions(uid, selectedDate),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  final transactions = snapshot.data!;
+
+                  return ListView.builder(
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      return ListTile(
+                        leading: Image.asset(
+                          transaction.category.icon,
+                          width: 40,
+                          height: 40,
+                        ),
+                        title: Text(transaction.category.name),
+                        subtitle: Text(transaction.category.type == 'Expenses'
+                            ? 'Chi phí'
+                            : 'Thu nhập'),
+                        trailing: Text(
+                          transaction.category.type == 'Expenses'
+                              ? "-${formatCurrency(transaction.amount)}"
+                              : formatCurrency(transaction.amount),
+                          style: TextStyle(
+                            color: transaction.category.type == 'Expenses'
+                                ? Colors.red
+                                : Colors.green,
+                          ),
+                        ),
+                        onTap: () =>
+                            _showDeleteConfirmationDialog(context, transaction),
+                      );
+                    },
+                  );
+                }
+
+                return const Text("Không có giao dịch nào trong tháng này.");
+              },
             ),
           ),
-          // Nút quay về tháng trước
-         Padding(
-  padding: const EdgeInsets.all(16.0),
-  child: ElevatedButton.icon(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Color.fromARGB(255, 254, 221, 85), // Đổi 'primary' thành 'backgroundColor'
-    ),
-    onPressed: () {
-      setState(() {
-        selectedDate = DateTime(
-          selectedDate.year,
-          selectedDate.month - 1,
-        );
-      });
-    },
-    icon: Icon(Icons.arrow_back, color: Colors.black),
-    label: Text("Tháng trước", style: TextStyle(color: Colors.black)),
-  ),
-),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add your onPressed code here!
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Color.fromARGB(255, 254, 221, 85),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        selectedItemColor: Color.fromARGB(255, 254, 221, 85),
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Biểu đồ'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.report), label: 'Báo cáo'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Tôi'),
-        ],
-      ),
+      // Phần còn lại của Scaffold
     );
   }
 
-  Widget listItem(String title, String amount, IconData icon) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.blue),
-      title: Text(title),
-      trailing: Text(amount, style: TextStyle(color: Colors.black)),
+  void _showDeleteConfirmationDialog(
+      BuildContext context, Transactions transaction) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Xác nhận'),
+          content: Text('Bạn có chắc muốn xóa giao dịch này không?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng hộp thoại mà không xóa
+              },
+              child: Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await TransactionService().deleteTransaction(
+                    transaction.id); // Gọi hàm xóa giao dịch từ Firestore
+                Navigator.of(context).pop(); // Đóng hộp thoại sau khi xóa
+              },
+              child: Text('Xóa'),
+              style: TextButton.styleFrom(
+                iconColor: Colors.red,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

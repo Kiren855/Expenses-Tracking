@@ -1,50 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:trackizer/common/color_extension.dart';
 import 'package:trackizer/model/category.dart';
+import 'package:trackizer/model/transaction.dart';
 import 'package:trackizer/service/category.dart';
+import 'package:trackizer/service/transation.dart';
+import 'package:trackizer/model/user.dart';
+import 'package:provider/provider.dart';
+import 'package:trackizer/view/home/home_screen.dart';
+import 'package:trackizer/view/main_tab/main_tab_view.dart';
 
 int selectedIndex = -1; // Chỉ mục được chọn hiện tại
 
 const List<String> chartType = <String>['Chi phí', 'Thu nhập'];
 
 String selectTab = 'expense';
-
-final List<Map<String, dynamic>> expenseItems = [
-  {"icon": "assets/img/shopping-cart.png", "name": "Mua sắm"},
-  {"icon": "assets/img/restaurant.png", "name": "Đồ ăn"},
-  {"icon": "assets/img/smartphone.png", "name": "Điện thoại"},
-  {"icon": "assets/img/micro.png", "name": "Giải trí"},
-  {"icon": "assets/img/book.png", "name": "Giáo dục"},
-  {"icon": "assets/img/cosmetics.png", "name": "Sắc đẹp"},
-  {"icon": "assets/img/swimming.png", "name": "Thể thao"},
-  {"icon": "assets/img/people.png", "name": "Xã hội"},
-  {"icon": "assets/img/delivery-truck.png", "name": "Vận tải"},
-  {"icon": "assets/img/tshirt.png", "name": "Quần áo"},
-  {"icon": "assets/img/transport.png", "name": "Xe hơi"},
-  {"icon": "assets/img/wine-glasses.png", "name": "Rượu"},
-  {"icon": "assets/img/box.png", "name": "Thuốc lá"},
-  {"icon": "assets/img/game-controller.png", "name": "Thiết bị điện"},
-  {"icon": "assets/img/airplane.png", "name": "Du lịch"},
-  {"icon": "assets/img/healthy.png", "name": "Sức khỏe"},
-  {"icon": "assets/img/pet.png", "name": "Thú cưng"},
-  {"icon": "assets/img/repair.png", "name": "Sửa chữa"},
-  {"icon": "assets/img/paint-roller.png", "name": "Nhà ở"},
-  {"icon": "assets/img/home.png", "name": "Nhà"},
-  {"icon": "assets/img/gift-card.png", "name": "Qùa tặng"},
-  {"icon": "assets/img/give-money.png", "name": "Quyên góp"},
-  {"icon": "assets/img/fortune-wheel.png", "name": "Vé số"},
-  {"icon": "assets/img/fast-food.png", "name": "Đồ ăn nhẹ"},
-  {"icon": "assets/img/playtime.png", "name": "Trẻ em"},
-  {"icon": "assets/img/vegetable.png", "name": "Rau qủa"},
-  {"icon": "assets/img/orange.png", "name": "Hoa qủa"},
-  {"icon": "assets/img/plus.png", "name": "Cài đặt"},
-  {"icon": "assets/img/money_1.png", "name": "Lương"},
-  {"icon": "assets/img/salary.png", "name": "Đầu tư"},
-  {"icon": "assets/img/back-in-time.png", "name": "Làm thêm"},
-  {"icon": "assets/img/money.png", "name": "Giải thưởng"},
-  {"icon": "assets/img/application.png", "name": "Khác"},
-  {"icon": "assets/img/plus.png", "name": "Cài đặt"},
-];
 
 class AddSubScriptionView extends StatefulWidget {
   const AddSubScriptionView({super.key});
@@ -55,22 +25,31 @@ class AddSubScriptionView extends StatefulWidget {
 
 class _AddSubScriptionViewState extends State<AddSubScriptionView> {
   List<Category> categories = [];
+  Category? selectedCategory;
+  String selectTab = 'expense';
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _getCategory();
   }
 
   void _getCategory() async {
     CategoryService categoryService = CategoryService();
-    categories = await categoryService.getCategories();
-    print(categories);
+    var loadedCategories = await categoryService.getCategories();
+    setState(() {
+      categories = loadedCategories;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.sizeOf(context);
+    final user = Provider.of<AppUser?>(context);
+    List<Category> filteredCategories = categories
+        .where((category) =>
+            category.type == (selectTab == 'expense' ? 'Expenses' : 'Income'))
+        .toList();
+
     return Scaffold(
       backgroundColor: TColor.white,
       body: Stack(
@@ -90,27 +69,21 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
                 childAspectRatio: 1,
               ),
               // Lọc các mục dựa trên loại Expenses hoặc Income
-              itemCount: categories
-                  .where((category) =>
-                      category.type ==
-                      (selectTab == 'expense' ? 'Expenses' : 'Income'))
-                  .length,
+              itemCount: filteredCategories.length,
               itemBuilder: (context, index) {
-                // Lọc danh sách categories dựa vào loại Expenses hoặc Income
-                List<Category> filteredCategories = categories
-                    .where((category) =>
-                        category.type ==
-                        (selectTab == 'expense' ? 'Expenses' : 'Income'))
-                    .toList();
-
                 var item = filteredCategories[index];
 
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedIndex = index;
+                      selectedCategory = item;
                     });
-                    _showNumberInputDialog(context, index);
+                    if (user != null) {
+                      _showNumberInputDialog(context, item, user);
+                    } else {
+                      // Xử lý trường hợp user là null nếu cần
+                      print("User is null");
+                    }
                   },
                   child: Column(
                     children: [
@@ -118,7 +91,7 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
                         width: 48.0,
                         height: 48.0,
                         decoration: BoxDecoration(
-                          color: selectedIndex == index
+                          color: selectedCategory == item
                               ? Colors.yellow
                               : Color(0xffe6e6e6),
                           shape: BoxShape.circle,
@@ -129,10 +102,10 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
                               item.icon,
                               width: 20.0,
                               height: 20.0,
-                              color: selectedIndex == index
+                              color: selectedCategory == item
                                   ? const Color.fromARGB(255, 142, 142, 142)
                                   : Color.fromARGB(255, 154, 154, 154),
-                              colorBlendMode: selectedIndex == index
+                              colorBlendMode: selectedCategory == item
                                   ? BlendMode.srcIn
                                   : BlendMode.modulate,
                             ),
@@ -319,28 +292,43 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
     );
   }
 
-  void _showNumberInputDialog(BuildContext context, int index) {
+  void _showNumberInputDialog(
+      BuildContext context, Category category, AppUser user) {
     TextEditingController amountController = TextEditingController();
+    TextEditingController descriptionController = TextEditingController();
+    DateTime selectedDate = DateTime.now();
+
+    Future<void> _selectDate(BuildContext context) async {
+      DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2101),
+      );
+      if (picked != null && picked != selectedDate) {
+        setState(() {
+          selectedDate = picked;
+        });
+      }
+    }
 
     showModalBottomSheet(
-      isScrollControlled: true, // Cho phép modal mở rộng toàn màn hình nếu cần
+      isScrollControlled: true,
       context: context,
       builder: (context) {
         return GestureDetector(
           onTap: () {
             Navigator.pop(context);
             setState(() {
-              selectedIndex = -1; // Gán lại selectedIndex khi thoát modal
+              selectedCategory = null;
             });
           },
           child: Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context)
-                  .viewInsets
-                  .bottom, // Lấy khoảng trống của bàn phím
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: GestureDetector(
-              onTap: () {}, // Để modal không bị đóng khi nhấn vào nội dung
+              onTap: () {},
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -348,7 +336,7 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Nhập số tiền cho ${expenseItems[index]['name']}",
+                        "Nhập thông tin cho ${category.name}",
                         style: TextStyle(
                             fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
@@ -356,31 +344,48 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
                         controller: amountController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(labelText: 'Số tiền'),
-                        onSubmitted: (value) {
-                          // Lưu giá trị sau khi nhập
-                          setState(() {
-                            expenseItems[index]['amount'] =
-                                int.tryParse(value) ?? 0;
-                          });
-                          Navigator.pop(context); // Đóng modal
-                          setState(() {
-                            selectedIndex =
-                                -1; // Gán lại selectedIndex khi thoát modal
-                          });
-                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: descriptionController,
+                        decoration: InputDecoration(labelText: 'Mô tả'),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Ngày: ${DateFormat.yMd().format(selectedDate)}",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _selectDate(context),
+                            child: Text("Chọn ngày"),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       ElevatedButton(
-                        onPressed: () {
-                          // Lưu giá trị sau khi nhập
+                        onPressed: () async {
+                          final transaction = Transactions(
+                            id: '',
+                            uid: user.uid!,
+                            amount: int.tryParse(amountController.text) ?? 0,
+                            category: category,
+                            description: descriptionController.text,
+                            date: selectedDate,
+                          );
+
+                          final transactionService = TransactionService();
+                          await transactionService.addTransaction(transaction);
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MainTabView()),
+                          );
                           setState(() {
-                            expenseItems[index]['amount'] =
-                                int.tryParse(amountController.text) ?? 0;
-                          });
-                          Navigator.pop(context); // Đóng bàn phím số
-                          setState(() {
-                            selectedIndex =
-                                -1; // Gán lại selectedIndex khi thoát modal
+                            selectedCategory = null;
                           });
                         },
                         child: Text("Lưu"),
@@ -394,9 +399,8 @@ class _AddSubScriptionViewState extends State<AddSubScriptionView> {
         );
       },
     ).whenComplete(() {
-      // Gán selectedIndex = -1 khi modal đóng, bao gồm cả khi nhấn ra ngoài
       setState(() {
-        selectedIndex = -1;
+        selectedCategory = null;
       });
     });
   }
