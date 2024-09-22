@@ -75,7 +75,7 @@ class _MainTabViewState extends State<MainTabView> {
                                       });
                                     },
                                     icon: Image.asset(
-                                      "img/file.png",
+                                      "assets/img/file.png",
                                       width: 28,
                                       height: 28,
                                       color: selectTab == 0
@@ -111,7 +111,7 @@ class _MainTabViewState extends State<MainTabView> {
                                       });
                                     },
                                     icon: Image.asset(
-                                      "img/analytics.png",
+                                      "assets/img/analytics.png",
                                       width: 28,
                                       height: 28,
                                       color: selectTab == 1
@@ -150,7 +150,7 @@ class _MainTabViewState extends State<MainTabView> {
                                       });
                                     },
                                     icon: Image.asset(
-                                      "img/statistics.png",
+                                      "assets/img/statistics.png",
                                       width: 28,
                                       height: 28,
                                       color: selectTab == 2
@@ -185,7 +185,7 @@ class _MainTabViewState extends State<MainTabView> {
                                       });
                                     },
                                     icon: Image.asset(
-                                      "img/user.png",
+                                      "assets/img/user.png",
                                       width: 28,
                                       height: 28,
                                       color: selectTab == 3
