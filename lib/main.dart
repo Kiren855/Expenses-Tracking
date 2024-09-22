@@ -15,6 +15,7 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+    name: "dev project",
     options: const FirebaseOptions(
       apiKey: "AIzaSyDGbo2J30RsAJB093XdgS5qR-yhjT3MYZY",
       authDomain: "expense-tracker-b6f36.firebaseapp.com",
