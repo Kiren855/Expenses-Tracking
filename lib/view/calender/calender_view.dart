@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:flutter/material.dart';
 import 'package:trackizer/common/color_extension.dart';
+import 'package:trackizer/view/add_subscription/add_subscription_view.dart';
 import 'package:trackizer/view/settings/settings_view.dart';
-
 import '../../common_widget/subscription_cell.dart';
 
 class CalenderView extends StatefulWidget {
@@ -15,278 +15,452 @@ class CalenderView extends StatefulWidget {
 }
 
 class _CalenderViewState extends State<CalenderView> {
+  int selectTab = 0;
   CalendarAgendaController calendarAgendaControllerNotAppBar =
       CalendarAgendaController();
   late DateTime selectedDateNotAppBBar;
 
-  Random random = new Random();
-
-  List subArr = [
-    {"name": "Spotify", "icon": "assets/img/spotify_logo.png", "price": "5.99"},
-    {
-      "name": "YouTube Premium",
-      "icon": "assets/img/youtube_logo.png",
-      "price": "18.99"
-    },
-    {
-      "name": "Microsoft OneDrive",
-      "icon": "assets/img/onedrive_logo.png",
-      "price": "29.99"
-    },
-    {"name": "NetFlix", "icon": "assets/img/netflix_logo.png", "price": "15.00"}
-  ];
-
-    @override
-  void initState() {
-    super.initState();
-    selectedDateNotAppBBar = DateTime.now();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.sizeOf(context);
     return Scaffold(
-      backgroundColor: TColor.gray,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: TColor.gray70.withOpacity(0.5),
-                  borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(25),
-                      bottomRight: Radius.circular(25))),
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Header với Tab bar
+          Container(
+            color: TColor.yellowHeader, // Màu vàng của header
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              children: [
+                Text(
+                  "Báo cáo", // Tiêu đề chính
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Calender",
-                                    style: TextStyle(
-                                        color: TColor.gray30, fontSize: 16),
-                                  ),
-                                ],
-                              ),
-
-                              Row(
-                                children: [
-                                  Spacer(),
-                                  IconButton(
-                                      onPressed: () {
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsView() ) );
-                                      },
-                                      icon: Image.asset("assets/img/settings.png",
-                                          width: 25,
-                                          height: 25,
-                                          color: TColor.gray30))
-                                ],
-                              )
-                            ],
+                    // Nút "Phân tích"
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.35,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            selectTab =
+                                0; // Khi nhấn vào nút này, cập nhật selectTab là 0
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: selectTab == 0
+                              ? Colors.black
+                              : TColor.yellowHeader, // Đổi màu khi được chọn
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(7.0),
+                              bottomLeft: Radius.circular(7.0),
+                            ),
                           ),
-                          const SizedBox(
-                            height: 20,
+                          side: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
                           ),
-                          Text(
-                            "Subs\nSchedule",
-                            style: TextStyle(
-                                color: TColor.white,
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold),
+                        ),
+                        child: Text(
+                          'Phân tích',
+                          style: TextStyle(
+                            color:
+                                selectTab == 0 ? TColor.yellowHeader : Colors.black,
                           ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "3 subscription for today",
-                                style: TextStyle(
-                                    color: TColor.gray30,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              InkWell(
-                                borderRadius: BorderRadius.circular(12),
-                                onTap: () {
-                                  calendarAgendaControllerNotAppBar.openCalender();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 8),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: TColor.border.withOpacity(0.1),
-                                    ),
-                                    color: TColor.gray60.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "January",
-                                        style: TextStyle(
-                                            color: TColor.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      Icon(
-                                        Icons.expand_more, color: TColor.white,
-                                        size: 16.0,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ],
-                          )
-                        ],
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 0),
 
-                    CalendarAgenda(
-                      controller: calendarAgendaControllerNotAppBar,
-                     backgroundColor: Colors.transparent,
-                     fullCalendarBackgroundColor: TColor.gray80,
-                      
-                      locale: 'en',
-                      weekDay: WeekDay.short,
-                      fullCalendarDay: WeekDay.short,
-                      selectedDateColor: TColor.white,
-                      initialDate: DateTime.now(),
-                      calendarEventColor: TColor.secondary,
-                      firstDate: DateTime.now().subtract(const Duration(days: 140)),
-                      lastDate: DateTime.now().add(const Duration(days: 140)),
-                      events: List.generate(
-                          100,
-                          (index) => DateTime.now().subtract(
-                              Duration(days: index * random.nextInt(5)))),
-                      onDateSelected: (date) {
-                        setState(() {
-                          selectedDateNotAppBBar = date;
-                        });
-                      },
-
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: TColor.border.withOpacity(0.15),
+                    // Nút "Tài khoản"
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.35,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            selectTab =
+                                1; // Khi nhấn vào nút này, cập nhật selectTab là 1
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: selectTab == 1
+                              ? Colors.black
+                              : TColor.yellowHeader, // Đổi màu khi được chọn
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(7.0),
+                              bottomRight: Radius.circular(7.0),
+                            ),
+                          ),
+                          side: BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
                         ),
-                        color: TColor.gray60.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-
-                      selectDecoration: BoxDecoration(
-                        border: Border.all(
-                          color: TColor.border.withOpacity(0.15),
-                        ),
-                        color: TColor.gray60,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-
-                      selectedEventLogo: Container(
-                        width: 5,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: TColor.secondary,
-                          borderRadius: BorderRadius.circular(3),
+                        child: Text(
+                          'Tài khoản',
+                          style: TextStyle(
+                            color:
+                                selectTab == 1 ? TColor.yellowHeader : Colors.black,
+                          ),
                         ),
                       ),
-                      eventLogo: Container(
-                        width: 5,
-                        height: 5,
-                        decoration:  BoxDecoration(
-                          
-                          color: TColor.secondary,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                      
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
+          ),
+          const SizedBox(height: 20), // Tạo khoảng cách
+
+          // Hiển thị nội dung dựa trên giá trị của selectTab
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: selectTab == 0
+                  ? _buildPhanTichContent() // Hiển thị nội dung của "Phân tích"
+                  : _buildTaiKhoanContent(), // Hiển thị nội dung của "Tài khoản"
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Nội dung khi tab "Phân tích" được chọn
+  Widget _buildPhanTichContent() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Căn lề trái cho nội dung
+            children: [
+              // Tiêu đề và mũi tên điều hướng
+              Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .spaceBetween, // Căn đều các phần tử trong Row
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "January",
-                        style: TextStyle(
-                            color: TColor.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "\$24.98",
-                        style: TextStyle(
-                            color: TColor.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      )
-                    ],
+                  Text(
+                    "Thống kê hàng tháng",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold, // Chữ in đậm
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "01.08.2023",
-                        style: TextStyle(
-                            color: TColor.gray30,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        "in upcoming bills",
-                        style: TextStyle(
-                            color: TColor.gray30,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500),
-                      )
-                    ],
-                  )
+                  Icon(Icons.arrow_forward_ios,
+                      size: 16), // Icon mũi tên điều hướng
                 ],
               ),
-            ),
-            GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 1),
-                itemCount: subArr.length,
-                itemBuilder: (context, index) {
-                  var sObj = subArr[index] as Map? ?? {};
-
-                  return SubScriptionCell(
-                    sObj: sObj,
-                    onPressed: () {},
-                  );
-                }),
-            const SizedBox(
-              height: 130,
-            ),
-          ],
+              const SizedBox(
+                  height: 10), // Khoảng cách giữa tiêu đề và nội dung bên dưới
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.start, // Căn đều các phần tử
+                children: [
+                  Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start, // Căn đều các phần tử
+                    children: [
+                      Text("Thg 9",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  Spacer(), // Khoảng trống giữa các mục để căn đều
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Chi phí",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text("3.900.000",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  Spacer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text("Thu nhập",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text("0",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
+        const SizedBox(height: 20),
+
+        // Ngân sách hàng tháng
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Ngân sách hàng tháng",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 16),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: TColor.gray, width: 4),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "--",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Còn lại:",
+                              style:
+                                  TextStyle(fontSize: 14, color: TColor.gray),
+                            ),
+                            Text(
+                              "-3.900.000",
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Ngân sách:",
+                              style:
+                                  TextStyle(fontSize: 14, color: TColor.gray),
+                            ),
+                            Text(
+                              "0",
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Chi phí:",
+                              style:
+                                  TextStyle(fontSize: 14, color: TColor.gray),
+                            ),
+                            Text(
+                              "3.900.000",
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTaiKhoanContent() {
+    return Column(
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width *
+              0.9, // Tăng chiều rộng của khối
+          padding: const EdgeInsets.all(20), // Padding xung quanh nội dung
+          decoration: BoxDecoration(
+            color: TColor.yellowHeader, // Màu nền vàng cho phần khối chính
+            borderRadius: BorderRadius.circular(12), // Bo góc các cạnh
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1), // Màu bóng đổ nhẹ
+                blurRadius: 6, // Độ mờ của bóng
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween, // Căn đều các phần tử
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Giá trị ròng",
+                        style: TextStyle(
+                            fontSize: 14, color: TColor.gray), // Màu chữ xám
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "5.000.000",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Tài sản",
+                        style: TextStyle(
+                            fontSize: 14, color: TColor.gray), // Màu chữ xám
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "154.320.212",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Nợ phải trả",
+                        style: TextStyle(
+                            fontSize: 14, color: TColor.gray), // Màu chữ xám
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "26.523.222",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20), // Khoảng cách giữa các khối
+
+        // Khối "Thêm tài khoản" và "Quản lý tài khoản" với màu nền riêng
+        Container(
+          padding: const EdgeInsets.symmetric(
+              vertical: 15), // Padding giữa các button
+          color: const Color(0xFFF5F5F5), // Màu nền của khối này
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Căn đều hai nút
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Hành động khi nhấn vào "Thêm tài khoản"
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 15, horizontal: 30), // Padding nút
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Bo góc nút
+                  ),
+                  backgroundColor: TColor.white, // Nền trắng cho nút
+                  side: BorderSide(
+                    color: TColor.gray, // Đường viền xám
+                    width: 1.0,
+                  ),
+                ),
+                child: Text(
+                  'Thêm tài khoản',
+                  style: TextStyle(
+                    color: Colors.black, // Màu chữ đen
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Hành động khi nhấn vào "Quản lý tài khoản"
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 15, horizontal: 30), // Padding nút
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Bo góc nút
+                  ),
+                  backgroundColor: TColor.white, // Nền trắng cho nút
+                  side: BorderSide(
+                    color: TColor.gray, // Đường viền xám
+                    width: 1.0,
+                  ),
+                ),
+                child: Text(
+                  'Quản lý tài khoản',
+                  style: TextStyle(
+                    color: Colors.black, // Màu chữ đen
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
