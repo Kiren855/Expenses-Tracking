@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:trackizer/common/color_extension.dart';
-import 'package:trackizer/view/login/welcome_view.dart';
-import 'package:trackizer/view/main_tab/main_tab_view.dart';
-import 'package:trackizer/view/login/sign_in_view.dart';
-import 'package:trackizer/view/login/social_login.dart';
 import 'package:trackizer/view/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:trackizer/service/auth.dart';
 import 'package:trackizer/model/user.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+    name: "dev project",
     options: const FirebaseOptions(
       apiKey: "AIzaSyDGbo2J30RsAJB093XdgS5qR-yhjT3MYZY",
       authDomain: "expense-tracker-b6f36.firebaseapp.com",
