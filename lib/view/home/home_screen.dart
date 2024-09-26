@@ -17,12 +17,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showMonthPicker(
-      context: context,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      initialDate: selectedDate,
-    );
-
+        context: context,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+        initialDate: selectedDate);
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
