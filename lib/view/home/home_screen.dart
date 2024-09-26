@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:trackizer/model/transaction.dart';
 import 'package:trackizer/model/user.dart';
 import 'package:trackizer/service/transation.dart';
+import 'package:trackizer/view/detail/transaction_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -15,35 +16,12 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime selectedDate = DateTime.now();
 
   Future<void> _selectDate(BuildContext context) async {
-<<<<<<< HEAD
-    final DateTime? picked = await showDatePicker(
+    final DateTime? picked = await showMonthPicker(
       context: context,
-      initialDate: selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Color.fromARGB(255, 254, 221, 85), // Màu của header
-              onPrimary: Colors.black, // Màu của text trên header
-              onSurface: Colors.black, // Màu của text bên trong
-            ),
-            textButtonTheme: TextButtonThemeData(
-
-            ),
-          ),
-          child: child!,
-        );
-      },
+      initialDate: selectedDate,
     );
-=======
-    final DateTime? picked = await showMonthPicker(
-        context: context,
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-        initialDate: selectedDate);
->>>>>>> 408f98b226bed09fce4dc1ece201c0a875e6d7e6
 
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -67,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final uid = user?.uid;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hôm', style: TextStyle(color: Colors.black)),
+        title: const Text('Sổ Thu Chi', style: TextStyle(color: Colors.black)),
         backgroundColor: const Color.fromARGB(255, 254, 221, 85),
       ),
       body: Column(
@@ -177,8 +155,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : Colors.green,
                           ),
                         ),
-                        onTap: () =>
-                            _showDeleteConfirmationDialog(context, transaction),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => TransactionDetailScreen(
+                                  transaction: transaction),
+                            ),
+                          );
+                        },
                       );
                     },
                   );
