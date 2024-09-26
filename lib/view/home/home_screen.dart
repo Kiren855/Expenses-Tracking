@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:trackizer/model/transaction.dart';
 import 'package:trackizer/model/user.dart';
 import 'package:trackizer/service/transation.dart';
+import 'package:trackizer/view/detail/transaction_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -20,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
         firstDate: DateTime(2000),
         lastDate: DateTime(2100),
         initialDate: selectedDate);
-
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
@@ -153,8 +153,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : Colors.green,
                           ),
                         ),
-                        onTap: () =>
-                            _showDeleteConfirmationDialog(context, transaction),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => TransactionDetailScreen(
+                                  transaction: transaction),
+                            ),
+                          );
+                        },
                       );
                     },
                   );
