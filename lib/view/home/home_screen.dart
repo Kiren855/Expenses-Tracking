@@ -6,6 +6,8 @@ import 'package:trackizer/model/transaction.dart';
 import 'package:trackizer/model/user.dart';
 import 'package:trackizer/service/transation.dart';
 import 'package:trackizer/view/detail/transaction_detail_screen.dart';
+import 'package:trackizer/view/detail/edit_transaction_detail_screen.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -133,34 +135,94 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: transactions.length,
                     itemBuilder: (context, index) {
                       final transaction = transactions[index];
-                      return ListTile(
-                        leading: Image.asset(
-                          transaction.category.icon,
-                          width: 40,
-                          height: 40,
-                        ),
-                        title: Text(transaction.category.name),
-                        subtitle: Text(transaction.category.type == 'Expenses'
-                            ? 'Chi phí'
-                            : 'Thu nhập'),
-                        trailing: Text(
-                          transaction.category.type == 'Expenses'
-                              ? "-${formatCurrency(transaction.amount)}"
-                              : formatCurrency(transaction.amount),
-                          style: TextStyle(
-                            color: transaction.category.type == 'Expenses'
-                                ? Colors.red
-                                : Colors.green,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => TransactionDetailScreen(
-                                  transaction: transaction),
+                      return Slidable(
+                        key: ValueKey(transaction
+                            .id), // Sử dụng ValueKey để xác định Slidable
+
+                        // ActionPane cho bên phải
+                        endActionPane: ActionPane(
+                          motion: const ScrollMotion(), // Chọn hiệu ứng trượt
+                          children: [
+                            SlidableAction(
+                              onPressed: (context) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => EditTransactionScreen(
+                                      transaction: transaction,
+                                    ),
+                                  ),
+                                );
+                              },
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                              icon: Icons.edit,
+                              label: 'Sửa',
                             ),
-                          );
-                        },
+                            SlidableAction(
+                              onPressed: (context) async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Xác nhận xóa'),
+                                    content: const Text(
+                                        'Bạn có chắc chắn muốn xóa giao dịch này không?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(false),
+                                        child: const Text('Hủy'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          TransactionService()
+                                              .deleteTransaction(
+                                                  transaction.id);
+                                          Navigator.of(ctx).pop(true);
+                                        },
+                                        child: const Text('Xóa'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              icon: Icons.delete,
+                              label: 'Xóa',
+                            ),
+                          ],
+                        ),
+
+                        // Nội dung chính của Slidable
+                        child: ListTile(
+                          leading: Image.asset(
+                            transaction.category.icon,
+                            width: 40,
+                            height: 40,
+                          ),
+                          title: Text(transaction.category.name),
+                          subtitle: Text(transaction.category.type == 'Expenses'
+                              ? 'Chi phí'
+                              : 'Thu nhập'),
+                          trailing: Text(
+                            transaction.category.type == 'Expenses'
+                                ? "-${formatCurrency(transaction.amount)}"
+                                : formatCurrency(transaction.amount),
+                            style: TextStyle(
+                              color: transaction.category.type == 'Expenses'
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TransactionDetailScreen(
+                                    transaction: transaction),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     },
                   );
