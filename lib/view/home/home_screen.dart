@@ -75,14 +75,36 @@ class _HomeScreenState extends State<HomeScreen> {
                               _selectDate(context);
                             },
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Căn trái cho các widget bên trong
                               children: [
-                                const Text("Tháng",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18)),
+                                // Dòng năm
                                 Text(
-                                    "${selectedDate.month}/${selectedDate.year}",
-                                    style: const TextStyle(
-                                        color: Colors.black, fontSize: 24)),
+                                  "${selectedDate.year}",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16, // Kích thước font nhỏ hơn
+                                  ),
+                                ),
+                                // Dòng "Thg" và tháng chính xác
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .start, // Căn trái cho dòng "Thg" và tháng
+                                  children: [
+                                    Text(
+                                      "Thg ${selectedDate.month}", // Chữ "Thg" và tháng chính xác
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 24, // Kích thước font lớn
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                        width:
+                                            8), // Khoảng cách giữa chữ và icon
+                                    Icon(
+                                        Icons.arrow_drop_down), // Icon dropdown
+                                  ],
+                                ),
                               ],
                             ),
                           ),
