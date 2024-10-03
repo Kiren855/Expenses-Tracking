@@ -1,8 +1,11 @@
 import 'dart:math';
-
+import 'package:trackizer/service/transation.dart';
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:trackizer/common/color_extension.dart';
+import 'package:trackizer/model/user.dart';
+import 'package:trackizer/service/transation.dart';
 import 'package:trackizer/view/add_subscription/add_subscription_view.dart';
 import 'package:trackizer/view/settings/settings_view.dart';
 import '../../common_widget/subscription_cell.dart';
@@ -68,8 +71,9 @@ class _CalenderViewState extends State<CalenderView> {
                         child: Text(
                           'Phân tích',
                           style: TextStyle(
-                            color:
-                                selectTab == 0 ? TColor.yellowHeader : Colors.black,
+                            color: selectTab == 0
+                                ? TColor.yellowHeader
+                                : Colors.black,
                           ),
                         ),
                       ),
@@ -105,8 +109,9 @@ class _CalenderViewState extends State<CalenderView> {
                         child: Text(
                           'Tài khoản',
                           style: TextStyle(
-                            color:
-                                selectTab == 1 ? TColor.yellowHeader : Colors.black,
+                            color: selectTab == 1
+                                ? TColor.yellowHeader
+                                : Colors.black,
                           ),
                         ),
                       ),
@@ -134,135 +139,131 @@ class _CalenderViewState extends State<CalenderView> {
 
   // Nội dung khi tab "Phân tích" được chọn
   Widget _buildPhanTichContent() {
+    final user = Provider.of<AppUser?>(context);
+    final uid = user?.uid;
+    DateTime currentMonth = DateTime.now();
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Căn lề trái cho nội dung
-            children: [
-              // Tiêu đề và mũi tên điều hướng
-              Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .spaceBetween, // Căn đều các phần tử trong Row
-                children: [
-                  Text(
-                    "Thống kê hàng tháng",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold, // Chữ in đậm
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios,
-                      size: 16), // Icon mũi tên điều hướng
-                ],
-              ),
-              const SizedBox(
-                  height: 10), // Khoảng cách giữa tiêu đề và nội dung bên dưới
-              Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.start, // Căn đều các phần tử
-                children: [
-                  Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start, // Căn đều các phần tử
-                    children: [
-                      Text("Thg 9",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  Spacer(), // Khoảng trống giữa các mục để căn đều
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("Chi phí",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                      Text("3.900.000",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                  Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text("Thu nhập",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                      Text("0",
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        // Ngân sách hàng tháng
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Ngân sách hàng tháng",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios, size: 16),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
+        StreamBuilder<Map<String, dynamic>>(
+          stream: TransactionService().getMonthlySummary(uid!, currentMonth),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final totalExpenses = snapshot.data!['totalExpenses'] ?? 0;
+              final totalIncome = snapshot.data!['totalIncome'] ?? 0;
+              final balance = snapshot.data!['balance'] ?? 0;
+              return Column(
                 children: [
                   Container(
-                    width: 50,
-                    height: 50,
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: TColor.gray, width: 4),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                        ),
+                      ],
                     ),
-                    child: Center(
-                      child: Text(
-                        "--",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start, // Căn lề trái cho nội dung
+                      children: [
+                        // Tiêu đề và mũi tên điều hướng
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment
+                              .spaceBetween, // Căn đều các phần tử trong Row
+                          children: [
+                            Text(
+                              "Thống kê hàng tháng",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold, // Chữ in đậm
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios,
+                                size: 16), // Icon mũi tên điều hướng
+                          ],
+                        ),
+                        const SizedBox(
+                            height:
+                                10), // Khoảng cách giữa tiêu đề và nội dung bên dưới
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.start, // Căn đều các phần tử
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Căn đều các phần tử
+                              children: [
+                                Text("Thg ${currentMonth.month}",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                            Spacer(), // Khoảng trống giữa các mục để căn đều
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text("Chi phí",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                                Text("${totalExpenses}",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                            Spacer(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text("Số dư",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                                Text("${balance}",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                            Spacer(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text("Thu nhập",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                                Text("${totalIncome}",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 15),
-                  Expanded(
+                  const SizedBox(height: 20),
+
+                  // Ngân sách hàng tháng
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -270,46 +271,95 @@ class _CalenderViewState extends State<CalenderView> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Còn lại:",
-                              style:
-                                  TextStyle(fontSize: 14, color: TColor.gray),
-                            ),
-                            Text(
-                              "-3.900.000",
+                              "Ngân sách hàng tháng",
                               style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
+                            Icon(Icons.arrow_forward_ios, size: 16),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "Ngân sách:",
-                              style:
-                                  TextStyle(fontSize: 14, color: TColor.gray),
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: TColor.gray, width: 4),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "--",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ),
                             ),
-                            Text(
-                              "0",
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Chi phí:",
-                              style:
-                                  TextStyle(fontSize: 14, color: TColor.gray),
-                            ),
-                            Text(
-                              "3.900.000",
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Còn lại:",
+                                        style: TextStyle(
+                                            fontSize: 14, color: TColor.gray),
+                                      ),
+                                      Text(
+                                        "-${totalExpenses}",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Ngân sách:",
+                                        style: TextStyle(
+                                            fontSize: 14, color: TColor.gray),
+                                      ),
+                                      Text(
+                                        "0",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Chi phí:",
+                                        style: TextStyle(
+                                            fontSize: 14, color: TColor.gray),
+                                      ),
+                                      Text(
+                                        "${totalExpenses}",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -317,9 +367,10 @@ class _CalenderViewState extends State<CalenderView> {
                     ),
                   ),
                 ],
-              ),
-            ],
-          ),
+              );
+            }
+            return const Text("Đã có lỗi xảy ra");
+          },
         ),
       ],
     );

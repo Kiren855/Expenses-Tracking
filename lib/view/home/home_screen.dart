@@ -222,7 +222,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 40,
                             height: 40,
                           ),
-                          title: Text(transaction.category.name),
+                          title: Text(
+                            transaction.description.isNotEmpty
+                                ? transaction.description
+                                : transaction.category.name,
+                            maxLines: 1, // Giới hạn số dòng hiển thị
+                            overflow: TextOverflow
+                                .ellipsis, // Hiển thị ba chấm nếu văn bản quá dài
+                          ),
                           subtitle: Text(transaction.category.type == 'Expenses'
                               ? 'Chi phí'
                               : 'Thu nhập'),

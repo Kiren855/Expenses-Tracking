@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
             secondary: TColor.secondary,
           ),
           useMaterial3: false,
-        ),
+        ), // Thiết lập ngôn ngữ là tiếng Việt
         home: Wrapper(),
       ),
     );
