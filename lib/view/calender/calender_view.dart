@@ -409,7 +409,7 @@ class _CalenderViewState extends State<CalenderView> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "5.000.000",
+                        "5.000",
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),
@@ -425,7 +425,7 @@ class _CalenderViewState extends State<CalenderView> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "154.320.212",
+                        "154.320",
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),
@@ -441,7 +441,7 @@ class _CalenderViewState extends State<CalenderView> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "26.523.222",
+                        "26.523",
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),

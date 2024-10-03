@@ -48,6 +48,7 @@ dependencies:
   card_swiper:
     path: dev_lib/card_swiper
   firebase_database: ^11.1.2
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

@@ -9,7 +9,7 @@ import 'package:trackizer/model/user.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    name: "dev project",
+    name: "dev env",
     options: const FirebaseOptions(
       apiKey: "AIzaSyDGbo2J30RsAJB093XdgS5qR-yhjT3MYZY",
       authDomain: "expense-tracker-b6f36.firebaseapp.com",
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
             secondary: TColor.secondary,
           ),
           useMaterial3: false,
-        ), // Thiết lập ngôn ngữ là tiếng Việt
+        ),
         home: Wrapper(),
       ),
     );
